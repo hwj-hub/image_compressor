@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<title>사진 용량 줄이기 · 100KB 맞춤 이미지 압축기</title>
+<meta name="description" content="원서접수·증명사진·서류제출용 사진 용량을 100KB, 200KB 등 원하는 KB로 정확히 맞춰 줄입니다. 설치 없이 브라우저에서 바로, 사진은 서버로 전송되지 않습니다.">
+<meta property="og:title" content="사진 용량 줄이기 · 100KB 맞춤 이미지 압축기">
+<meta property="og:description" content="원하는 KB에 정확히 맞춰 압축. 설치 없이 브라우저에서 바로, 100% 내 기기에서 처리.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%F0%9F%97%9C%3C/text%3E%3C/svg%3E">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#eef1f8; --card:#fff; --card2:#f6f8fd; --fg:#111827; --muted:#667085; --line:#e3e8f0;
+  --accent:#4f46e5; --accent2:#0ea5e9; --afg:#fff;
+  --ok:#059669; --okbg:#e8f7f1; --warn:#b45309; --warnbg:#fef4e6; --danger:#dc2626;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 8px 24px -14px rgba(16,24,40,.25);
+  --r:16px;
+}
+@media (prefers-color-scheme:dark){
+ :root{
+  --bg:#0a0f1e; --card:#131a2c; --card2:#0f1524; --fg:#e8ecf6; --muted:#94a0b8; --line:#25304a;
+  --accent:#7c8bff; --accent2:#38bdf8; --afg:#0b1020;
+  --ok:#34d399; --okbg:#0d2a22; --warn:#fbbf24; --warnbg:#2a2110; --danger:#f87171;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.8);
+ }
+}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);line-height:1.55;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,sans-serif;
+  -webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:940px;margin:0 auto;padding:0 14px calc(56px + env(safe-area-inset-bottom))}
+
+/* ══ 광고 슬롯 ══ */
+.ad-slot{display:flex;align-items:center;justify-content:center;margin:10px auto;overflow:hidden}
+.ad-top{width:320px;height:50px;max-width:100%}
+.ad-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);
+  border-radius:8px;background:var(--card2);color:var(--muted);font-size:11px;letter-spacing:.08em;font-weight:600}
+
+header{text-align:center;padding:16px 0 4px}
+.logo{display:inline-flex;align-items:center;gap:9px;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.logo .ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:var(--shadow)}
+.tag{font-size:14.5px;font-weight:600;color:var(--muted);margin:8px 0 0}
+.tag b{color:var(--fg)}
+.badges{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+.badge{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--okbg);color:var(--ok);border:1px solid transparent}
+.badge.gray{background:var(--card2);color:var(--muted);border-color:var(--line)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-top:14px}
+.card h2{font-size:12px;font-weight:800;color:var(--muted);margin:0 0 12px;letter-spacing:.07em;text-transform:uppercase}
+
+#drop{border:2px dashed var(--line);border-radius:var(--r);background:var(--card);padding:30px 16px;text-align:center;
+  cursor:pointer;transition:.18s;margin-top:14px}
+#drop:hover,#drop.over{border-color:var(--accent);background:var(--card2)}
+#drop.over{box-shadow:0 0 0 4px rgba(79,70,229,.18)}
+#drop .big{font-size:38px;line-height:1}
+#drop .t1{font-weight:800;font-size:16.5px;margin-top:8px}
+#drop .t2{color:var(--muted);font-size:12.5px;margin-top:4px}
+#file{display:none}
+
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--card2);padding:5px;border-radius:12px;border:1px solid var(--line)}
+.tab{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:13.5px;padding:11px 4px;border-radius:9px;cursor:pointer;transition:.15s}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--afg);box-shadow:var(--shadow)}
+.row{margin-top:15px}
+.lab{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:13.5px;font-weight:800;margin-bottom:8px}
+.lab .hint{font-weight:500;color:var(--muted);font-size:12px;text-align:right}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--card2);color:var(--fg);font:inherit;font-size:13px;font-weight:700;
+  padding:9px 13px;border-radius:999px;cursor:pointer;transition:.15s;min-height:42px}
+.chip:hover{border-color:var(--accent)}
+.chip.on{background:var(--accent);color:var(--afg);border-color:var(--accent)}
+.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:9px}
+.inline .hint{color:var(--muted);font-size:12.5px}
+input[type=number],select{font:inherit;font-size:15px;color:var(--fg);background:var(--card2);border:1px solid var(--line);
+  border-radius:10px;padding:9px 11px;min-height:44px;max-width:100%}
+input[type=number]{width:112px}
+select{width:100%}
+input[type=range]{width:100%;accent-color:var(--accent);height:36px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:540px){.grid2{grid-template-columns:1fr}}
+.switch{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:600;cursor:pointer;padding:14px 0 4px;min-height:46px}
+.switch input{width:20px;height:20px;flex:0 0 20px;accent-color:var(--accent)}
+
+.actions{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap}
+.btn{flex:1 1 150px;border:1px solid var(--line);background:var(--card2);color:var(--fg);font:inherit;font-weight:800;font-size:15px;
+  padding:13px 14px;border-radius:12px;cursor:pointer;transition:.15s;min-height:50px;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;box-shadow:var(--shadow)}
+.btn.primary:hover:not(:disabled){filter:brightness(1.08)}
+
+#prog{display:none;margin-top:14px}
+#prog.show{display:block}
+.bar{height:8px;background:var(--card2);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .18s}
+.ptxt{font-size:12.5px;color:var(--muted);margin-top:7px;text-align:center;font-weight:600}
+
+#sum{display:none;margin-top:14px;text-align:center;background:var(--okbg);border-radius:var(--r);padding:15px}
+#sum.show{display:block}
+#sum .n{color:var(--ok);font-size:26px;font-weight:800;letter-spacing:-.02em}
+#sum .s{font-size:13px;color:var(--muted);margin-top:2px}
+
+.item{display:flex;gap:11px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.thumb{width:54px;height:54px;flex:0 0 54px;border-radius:10px;object-fit:cover;background:var(--card2);border:1px solid var(--line)}
+.thumb.done{cursor:zoom-in}
+.meta{flex:1;min-width:0}
+.fname{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fsz{font-size:12.5px;color:var(--muted);margin-top:2px;display:flex;flex-wrap:wrap;gap:5px 8px;align-items:center}
+.del{font-weight:800;color:var(--ok)}
+.del.bad{color:var(--warn)}
+.dim{font-variant-numeric:tabular-nums}
+.err{color:var(--danger);font-weight:700}
+.dl{flex:0 0 auto;text-decoration:none;background:var(--accent);color:var(--afg);font-size:12.5px;font-weight:800;
+  padding:0 14px;border-radius:10px;min-height:40px;display:flex;align-items:center}
+.x{flex:0 0 auto;border:0;background:transparent;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;
+  width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:10px}
+.x:hover{color:var(--danger)}
+
+details{border-top:1px solid var(--line);padding:12px 0}
+details:first-of-type{border-top:0}
+summary{cursor:pointer;font-weight:700;font-size:14px;list-style:none;padding:10px 0;margin:-10px 0}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"＋ ";color:var(--accent);font-weight:800}
+details[open] summary::before{content:"－ "}
+details p{margin:8px 0 0;font-size:13.5px;color:var(--muted)}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-height:1.8}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:#111827;color:#fff;font-size:13.5px;font-weight:700;
+  padding:11px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:92vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-color-scheme:dark){#toast{background:#e8ecf6;color:#0b1020}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ╔══════════════════════════════════════════════════════════════╗
+     ║  광고 슬롯 · 상단 320 × 50 (모바일 배너)                      ║
+     ║  실제 게재 시 아래 <div class="ad-ph"> 를 광고 코드로 교체     ║
+     ║  · 애드센스: <ins class="adsbygoogle"                         ║
+     ║      style="display:inline-block;width:320px;height:50px"     ║
+     ║      data-ad-client="ca-pub-XXXX" data-ad-slot="XXXX"></ins>  ║
+     ║  · 카카오 애드핏: <ins class="kakao_ad_area" ...></ins>        ║
+     ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="ad-slot ad-top" id="ad-top">
+  <div class="ad-ph">AD 320 &times; 50</div>
+</div>
+<!-- ══ 광고 슬롯 끝 ══ -->
+
+<header>
+  <div class="logo"><span class="ico">🗜️</span><span>사진 용량 줄이기</span></div>
+  <p class="tag">원하는 <b>KB에 정확히 맞춰</b> 압축 · 설치 없이 브라우저에서 바로</p>
+  <div class="badges">
+    <span class="badge">🔒 사진이 서버로 전송되지 않음</span>
+    <span class="badge gray">무료 · 무제한</span>
+    <span class="badge gray">여러 장 한 번에</span>
+  </div>
+</header>
+
+<div id="drop" tabindex="0" role="button" aria-label="사진 선택하기">
+  <div class="big">📁</div>
+  <div class="t1">사진을 선택하거나 여기로 끌어다 놓으세요</div>
+  <div class="t2">JPG · PNG · WebP · GIF &nbsp;|&nbsp; 여러 장 동시 선택 · 붙여넣기(Ctrl+V) 가능</div>
+</div>
+<input type="file" id="file" accept="image/*" multiple>
+
+<div class="card" id="listCard" hidden>
+  <h2>사진 목록 <span id="cnt"></span></h2>
+  <div id="list"></div>
+</div>
+
+<div class="card">
+  <h2>압축 설정</h2>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tabTarget" role="tab" aria-selected="true">🎯 목표 용량 맞추기</button>
+    <button class="tab" id="tabQual" role="tab" aria-selected="false">🎚️ 품질 직접 조절</button>
+  </div>
+
+  <div id="targetBox">
+    <div class="row">
+      <div class="lab"><span>목표 용량</span><span class="hint">이 크기 <b>이하</b>가 되도록 자동 조절</span></div>
+      <div class="chips" id="kbChips">
+        <button class="chip" data-kb="50">50KB</button>
+        <button class="chip on" data-kb="100">100KB</button>
+        <button class="chip" data-kb="200">200KB</button>
+        <button class="chip" data-kb="300">300KB</button>
+        <button class="chip" data-kb="500">500KB</button>
+        <button class="chip" data-kb="1024">1MB</button>
+        <button class="chip" data-kb="2048">2MB</button>
+      </div>
+      <div class="inline">
+        <input type="number" id="kb" min="5" max="51200" step="5" value="100" aria-label="목표 용량(KB)">
+        <span class="hint">KB 이하로</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="qualBox" hidden>
+    <div class="row">
+      <div class="lab"><span>품질</span><span class="hint" id="qv">80%</span></div>
+      <input type="range" id="q" min="20" max="100" value="80" aria-label="품질">
+      <p class="hint" style="margin:2px 0 0;color:var(--muted);font-size:12px">80% 전후가 눈으로 구분이 거의 안 되면서 용량이 크게 줄어드는 구간입니다.</p>
+    </div>
+  </div>
+
+  <div class="grid2 row">
+    <div>
+      <div class="lab"><span>크기(해상도)</span></div>
+      <select id="resizeSel">
+        <option value="long" selected>긴 변 기준으로 축소</option>
+        <option value="none">원본 크기 유지</option>
+        <option value="exact">정확한 픽셀 (가운데 잘라내기)</option>
+      </select>
+    </div>
+    <div>
+      <div class="lab"><span>저장 형식</span></div>
+      <select id="fmt">
+        <option value="image/jpeg" selected>JPG (호환성 최고 · 서류 제출용)</option>
+        <option value="auto">자동 (원본 형식 유지)</option>
+        <option value="image/webp">WebP (같은 화질에 더 작음)</option>
+        <option value="image/png">PNG (무손실 · 투명 배경)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row" id="longBox">
+    <div class="lab"><span>긴 변 최대 픽셀</span><span class="hint">이미 더 작은 사진은 그대로 둡니다</span></div>
+    <div class="chips" id="longChips">
+      <button class="chip" data-le="640">640</button>
+      <button class="chip" data-le="800">800</button>
+      <button class="chip" data-le="1024">1024</button>
+      <button class="chip" data-le="1280">1280</button>
+      <button class="chip on" data-le="1920">1920 (FHD)</button>
+      <button class="chip" data-le="2560">2560</button>
+      <button class="chip" data-le="4000">4000</button>
+    </div>
+    <div class="inline"><input type="number" id="longEdge" value="1920" min="50" max="12000" aria-label="긴 변 픽셀"><span class="hint">px</span></div>
+  </div>
+
+  <div class="row" id="exactBox" hidden>
+    <div class="lab"><span>정확한 크기</span><span class="hint">비율이 다르면 가운데를 잘라냅니다</span></div>
+    <div class="chips" id="exChips">
+      <button class="chip" data-w="354" data-h="472">증명 3×4cm</button>
+      <button class="chip on" data-w="413" data-h="531">여권·신분증 3.5×4.5cm</button>
+      <button class="chip" data-w="591" data-h="827">명함판 5×7cm</button>
+      <button class="chip" data-w="1000" data-h="1000">정사각 1000</button>
+    </div>
+    <div class="inline">
+      <input type="number" id="exW" value="413" min="10" max="12000" aria-label="가로 픽셀"><span class="hint">×</span>
+      <input type="number" id="exH" value="531" min="10" max="12000" aria-label="세로 픽셀"><span class="hint">px (300dpi 기준)</span>
+    </div>
+  </div>
+
+  <label class="switch"><input type="checkbox" id="keepName"> 원본 파일명 그대로 저장 <span class="hint" style="color:var(--muted);font-weight:500">(끄면 _compressed 가 붙습니다)</span></label>
+
+  <div class="actions">
+    <button class="btn primary" id="go" disabled>용량 줄이기</button>
+    <button class="btn" id="zip" disabled>📦 ZIP으로 전체 저장</button>
+    <button class="btn" id="clear" disabled>비우기</button>
+  </div>
+
+  <div id="prog"><div class="bar"><i></i></div><div class="ptxt" id="ptxt"></div></div>
+</div>
+
+<div id="sum"></div>
+
+<div class="card">
+  <h2>자주 묻는 질문</h2>
+  <details open><summary>제 사진이 어딘가로 업로드되나요?</summary>
+    <p>아니요. 모든 처리는 브라우저 안(내 기기)에서만 일어납니다. 서버로 전송되는 데이터가 전혀 없어서, 페이지를 연 뒤 인터넷을 꺼도 그대로 동작합니다.</p></details>
+  <details><summary>100KB 이하로 정확히 맞춰지나요?</summary>
+    <p>먼저 품질을 이진 탐색으로 자동 조절해 목표에 가장 가까운 값을 찾고, 그래도 목표를 못 맞추면 해상도를 단계적으로 줄여 재시도합니다. 목표 달성에 실패하면 결과에 노란색으로 표시됩니다.</p></details>
+  <details><summary>원서접수·증명사진 규격은 어떻게 맞추나요?</summary>
+    <p>크기를 <b>정확한 픽셀(가운데 잘라내기)</b>로 바꾸고 증명 3×4cm(354×472) 또는 여권 3.5×4.5cm(413×531)를 고르세요. 형식은 JPG, 목표 용량은 기관 요구값(보통 100~300KB)으로 두면 됩니다.</p></details>
+  <details><summary>아이폰 HEIC 파일이 안 열려요</summary>
+    <p>HEIC는 사파리 외 브라우저가 열지 못합니다. 아이폰 <b>설정 › 카메라 › 포맷 › 높은 호환성</b>으로 바꿔 촬영하거나, 사진을 카카오톡·메일로 한 번 보내 JPG로 변환한 뒤 사용하세요.</p></details>
+  <details><summary>위치정보(EXIF)는 남나요?</summary>
+    <p>남지 않습니다. 다시 그려서 저장하는 방식이라 촬영 위치·기기 정보 같은 메타데이터가 모두 제거됩니다. 회전 방향만 올바르게 반영됩니다.</p></details>
+</div>
+
+<footer>
+  100% 브라우저 내 처리 · 업로드 없음 · 파일 개수 제한 없음<br>
+  © 사진 용량 줄이기 — 오프라인에서도 동작하는 단일 파일 유틸리티
+</footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s);};
+var el={
+  drop:$('#drop'),file:$('#file'),list:$('#list'),listCard:$('#listCard'),cnt:$('#cnt'),
+  go:$('#go'),zip:$('#zip'),clear:$('#clear'),prog:$('#prog'),bar:$('#prog .bar>i'),ptxt:$('#ptxt'),
+  sum:$('#sum'),toast:$('#toast'),
+  tabTarget:$('#tabTarget'),tabQual:$('#tabQual'),targetBox:$('#targetBox'),qualBox:$('#qualBox'),
+  kb:$('#kb'),kbChips:$('#kbChips'),q:$('#q'),qv:$('#qv'),
+  resizeSel:$('#resizeSel'),longBox:$('#longBox'),longChips:$('#longChips'),longEdge:$('#longEdge'),
+  exactBox:$('#exactBox'),exChips:$('#exChips'),exW:$('#exW'),exH:$('#exH'),
+  fmt:$('#fmt'),keepName:$('#keepName')
+};
+
+var items=[], mode='target', busy=false, uid=0;
+
+/* ───────── 유틸 ───────── */
+function fmtSize(b){
+  if(b<1024) return b+' B';
+  if(b<1024*1024) return (b/1024).toFixed(b/1024<100?1:0)+' KB';
+  return (b/1048576).toFixed(2)+' MB';
+}
+var toastT;
+function toast(msg){
+  el.toast.textContent=msg; el.toast.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(function(){el.toast.classList.remove('show');},2600);
+}
+var webpOK=(function(){
+  try{var c=document.createElement('canvas');c.width=c.height=1;
+      return c.toDataURL('image/webp').indexOf('data:image/webp')===0;}catch(e){return false;}
+})();
+if(!webpOK){ var o=el.fmt.querySelector('option[value="image/webp"]'); if(o){o.disabled=true;o.textContent='WebP (이 브라우저 미지원)';} }
+
+function setChip(container,btn){
+  var all=container.querySelectorAll('.chip');
+  for(var i=0;i<all.length;i++) all[i].classList.remove('on');
+  if(btn) btn.classList.add('on');
+}
+
+/* ───────── 파일 담기 ───────── */
+function addFiles(fs){
+  var added=0, skipped=0;
+  for(var i=0;i<fs.length;i++){
+    var f=fs[i];
+    if(!f.type || f.type.indexOf('image/')!==0){ skipped++; continue; }
+    items.push({id:++uid,file:f,name:f.name||('image'+uid+'.jpg'),src:f.size,out:null,blob:null,
+                url:null,srcUrl:URL.createObjectURL(f),w:0,h:0,ow:0,oh:0,err:null,hit:true});
+    added++;
+  }
+  if(skipped) toast('이미지가 아닌 파일 '+skipped+'개는 제외했습니다');
+  if(added) render();
+}
+
+function render(){
+  el.listCard.hidden = items.length===0;
+  el.cnt.textContent = items.length? '('+items.length+'장)' : '';
+  el.go.disabled = busy || items.length===0;
+  el.clear.disabled = busy || items.length===0;
+  var doneCnt=0; for(var i=0;i<items.length;i++) if(items[i].blob) doneCnt++;
+  el.zip.disabled = busy || doneCnt<1;
+
+  el.list.innerHTML='';
+  items.forEach(function(it){
+    var row=document.createElement('div'); row.className='item';
+
+    var img=document.createElement('img'); img.className='thumb'; img.alt='';
+    img.src = it.url || it.srcUrl;
+    if(it.url){ img.classList.add('done'); img.title='새 탭에서 크게 보기';
+      img.onclick=function(){ window.open(it.url,'_blank'); }; }
+    row.appendChild(img);
+
+    var meta=document.createElement('div'); meta.className='meta';
+    var n=document.createElement('div'); n.className='fname'; n.textContent=it.name; meta.appendChild(n);
+    var s=document.createElement('div'); s.className='fsz';
+    if(it.err){
+      s.innerHTML='<span class="err">⚠ '+it.err+'</span>';
+    }else if(it.blob){
+      var pct=Math.round((1-it.out/it.src)*100);
+      s.innerHTML='<span class="dim">'+fmtSize(it.src)+'</span>'+
+        '<span>→</span><span class="dim"><b>'+fmtSize(it.out)+'</b></span>'+
+        '<span class="del'+(it.hit?'':' bad')+'">'+(pct>0?'-'+pct+'%':'+'+Math.abs(pct)+'%')+'</span>'+
+        '<span class="dim">· '+it.w+'×'+it.h+'px</span>'+
+        (it.hit?'':'<span class="del bad">· 목표 미달</span>');
+    }else{
+      s.innerHTML='<span class="dim">'+fmtSize(it.src)+'</span><span>· 대기 중</span>';
+    }
+    meta.appendChild(s);
+    row.appendChild(meta);
+
+    if(it.blob){
+      var a=document.createElement('a'); a.className='dl'; a.textContent='저장';
+      a.href=it.url; a.download=it.outName; row.appendChild(a);
+    }
+    var x=document.createElement('button'); x.className='x'; x.type='button';
+    x.setAttribute('aria-label','제거'); x.innerHTML='&times;';
+    x.onclick=function(){ if(busy)return;
+      if(it.url) URL.revokeObjectURL(it.url);
+      if(it.srcUrl) URL.revokeObjectURL(it.srcUrl);
+      items=items.filter(function(v){return v.id!==it.id;});
+      el.sum.classList.remove('show'); render(); };
+    row.appendChild(x);
+    el.list.appendChild(row);
+  });
+}
+
+/* ───────── 이미지 로드 / 렌더 ───────── */
+function loadImage(file){
+  return new Promise(function(res,rej){
+    var done=false;
+    function viaTag(){
+      if(done) return;
+      var url=URL.createObjectURL(file), img=new Image();
+      img.onload=function(){ done=true; img._url=url; res(img); };
+      img.onerror=function(){ URL.revokeObjectURL(url); rej(new Error('이 형식은 브라우저가 열 수 없습니다 (HEIC 등)')); };
+      img.src=url;
+    }
+    if(window.createImageBitmap){
+      createImageBitmap(file,{imageOrientation:'from-image'})
+        .then(function(b){ done=true; res(b); })
+        .catch(function(){
+          createImageBitmap(file).then(function(b){ done=true; res(b); }).catch(viaTag);
+        });
+    } else viaTag();
+  });
+}
+function newCanvas(w,h){ var c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
+
+function geometry(sw,sh,opt){
+  if(opt.resize==='none') return {sx:0,sy:0,sw:sw,sh:sh,dw:sw,dh:sh};
+  if(opt.resize==='long'){
+    var L=opt.longEdge, m=Math.max(sw,sh);
+    if(m<=L) return {sx:0,sy:0,sw:sw,sh:sh,dw:sw,dh:sh};
+    var r=L/m;
+    return {sx:0,sy:0,sw:sw,sh:sh,dw:Math.max(1,Math.round(sw*r)),dh:Math.max(1,Math.round(sh*r))};
+  }
+  var tw=opt.exW, th=opt.exH, sr=sw/sh, tr=tw/th, cw, ch;
+  if(sr>tr){ ch=sh; cw=Math.round(sh*tr); } else { cw=sw; ch=Math.round(sw/tr); }
+  cw=Math.min(cw,sw); ch=Math.min(ch,sh);
+  return {sx:Math.round((sw-cw)/2),sy:Math.round((sh-ch)/2),sw:cw,sh:ch,dw:tw,dh:th};
+}
+
+/* 원본에서 잘라낸 기준 캔버스(1회 생성) — 너무 크면 미리 축소 */
+function makeBase(src,g){
+  var MAX=28000000, w=g.sw, h=g.sh;
+  if(w*h>MAX){ var k=Math.sqrt(MAX/(w*h)); w=Math.round(w*k); h=Math.round(h*k); }
+  var c=newCanvas(w,h), x=c.getContext('2d');
+  x.imageSmoothingEnabled=true; x.imageSmoothingQuality='high';
+  x.drawImage(src,g.sx,g.sy,g.sw,g.sh,0,0,w,h);
+  return c;
+}
+/* 단계적 축소로 선명하게 리사이즈 */
+function renderAt(base,dw,dh,white){
+  var cur=base, cw=base.width, ch=base.height;
+  while(cw>=dw*2 && ch>=dh*2 && cw>2 && ch>2){
+    var nw=Math.max(dw,cw>>1), nh=Math.max(dh,ch>>1);
+    var n=newCanvas(nw,nh), nx=n.getContext('2d');
+    nx.imageSmoothingEnabled=true; nx.imageSmoothingQuality='high';
+    nx.drawImage(cur,0,0,cw,ch,0,0,nw,nh);
+    cur=n; cw=nw; ch=nh;
+  }
+  var out=newCanvas(dw,dh), ox=out.getContext('2d');
+  if(white){ ox.fillStyle='#ffffff'; ox.fillRect(0,0,dw,dh); }
+  ox.imageSmoothingEnabled=true; ox.imageSmoothingQuality='high';
+  ox.drawImage(cur,0,0,cw,ch,0,0,dw,dh);
+  return out;
+}
+/* 인코딩: toDataURL(동기)을 쓴다.
+   toBlob은 콜백이 프레임 스케줄러를 타서 호출당 고정 지연이 붙는 환경이 있는데,
+   목표 용량 탐색은 한 장당 8번 넘게 인코딩하므로 그 지연이 그대로 누적된다.
+   toDataURL은 동기라 그 영향이 없고, 바이트 수도 base64 길이에서 정확히 계산된다. */
+function b64bytes(u){
+  var i=u.indexOf(','); if(i<0) return 0;
+  var n=u.length-i-1, pad=0;
+  if(u.charCodeAt(u.length-1)===61) pad++;
+  if(u.charCodeAt(u.length-2)===61) pad++;
+  return Math.floor(n*3/4)-pad;
+}
+function dataURLtoBlob(u){
+  var i=u.indexOf(','), semi=u.indexOf(';'), mime=u.slice(5,semi>0?semi:i);
+  var bin=atob(u.slice(i+1)), len=bin.length, arr=new Uint8Array(len);
+  for(var k=0;k<len;k++) arr[k]=bin.charCodeAt(k);
+  return new Blob([arr],{type:mime});
+}
+function enc(canvas,type,q){
+  var u = (type==='image/png') ? canvas.toDataURL('image/png') : canvas.toDataURL(type,q);
+  if(u.indexOf('data:'+type)!==0 && type!=='image/jpeg'){   // 형식 미지원 시 JPG로 폴백
+    u = canvas.toDataURL('image/jpeg',q===undefined?0.9:q);
+  }
+  return {url:u, size:b64bytes(u)};
+}
+function yieldThen(fn){ return new Promise(function(res){ setTimeout(res,0); }).then(fn); }
+
+/* ───────── 압축 코어 ───────── */
+/* 목표에 못 미칠 때, 크기는 픽셀 수에 거의 비례하므로
+   다음 배율을 sqrt(목표/현재)로 예측해 한 번에 근처까지 점프한다. */
+function nextScale(s,size,target){
+  var r=Math.sqrt(target/size)*0.96;
+  if(!isFinite(r)||r<=0) r=0.7;
+  r=Math.min(r,0.9); r=Math.max(r,0.35);
+  return s*r;
+}
+
+function compress(it,opt){
+  var src,base,type,white,g;
+  return loadImage(it.file).then(function(s){
+    src=s;
+    var sw=src.width||src.naturalWidth, sh=src.height||src.naturalHeight;
+    if(!sw||!sh) throw new Error('이미지 크기를 읽을 수 없습니다');
+    it.ow=sw; it.oh=sh;
+    type = opt.fmt==='auto'
+      ? (it.file.type==='image/png' ? 'image/png' : (it.file.type==='image/webp'&&webpOK ? 'image/webp' : 'image/jpeg'))
+      : opt.fmt;
+    if(type==='image/webp'&&!webpOK) type='image/jpeg';
+    white = (type==='image/jpeg');
+    g = geometry(sw,sh,opt);
+    base = makeBase(src,g);
+    if(src._url) URL.revokeObjectURL(src._url);
+    if(src.close) try{src.close();}catch(e){}
+    return opt.mode==='quality' ? runQuality() : runTarget();
+  });
+
+  function runQuality(){
+    var cv=renderAt(base,g.dw,g.dh,white);
+    var r=enc(cv,type,type==='image/png'?undefined:opt.q);
+    return Promise.resolve({blob:dataURLtoBlob(r.url),w:g.dw,h:g.dh,type:type,hit:true});
+  }
+
+  function runTarget(){
+    var target=opt.targetKB*1024, best=null, s=1, guard=0;
+    function done(url,w,h,hit){ return {blob:dataURLtoBlob(url),w:w,h:h,type:type,hit:hit}; }
+
+    function attempt(){
+      if(guard++>=9 || s<0.04)
+        return Promise.resolve(best?done(best.url,best.w,best.h,false):null);
+      var dw=Math.max(1,Math.round(g.dw*s)), dh=Math.max(1,Math.round(g.dh*s));
+      var cv=renderAt(base,dw,dh,white);
+
+      if(type==='image/png'){
+        var p=enc(cv,'image/png');
+        if(!best||p.size<best.size) best={url:p.url,size:p.size,w:dw,h:dh};
+        if(p.size<=target) return Promise.resolve(done(p.url,dw,dh,true));
+        s=nextScale(s,p.size,target);
+        return yieldThen(attempt);
+      }
+
+      var LO=0.28, HI=0.92;
+      var hiR=enc(cv,type,HI);
+      if(hiR.size<=target) return Promise.resolve(done(hiR.url,dw,dh,true));
+
+      var loR=enc(cv,type,LO);
+      if(!best||loR.size<best.size) best={url:loR.url,size:loR.size,w:dw,h:dh};
+      if(loR.size>target){ s=nextScale(s,loR.size,target); return yieldThen(attempt); }
+
+      /* 품질 이진 탐색: 목표 이하 중 가장 높은 품질을 찾는다 */
+      var lo=LO, hi=HI, bestU=loR.url;
+      for(var k=0;k<6;k++){
+        var mid=(lo+hi)/2, m=enc(cv,type,mid);
+        if(m.size<=target){ bestU=m.url; lo=mid; } else { hi=mid; }
+      }
+      return Promise.resolve(done(bestU,dw,dh,true));
+    }
+    return attempt();
+  }
+}
+
+/* ───────── 실행 ───────── */
+function readOpts(){
+  return {
+    mode:mode,
+    targetKB:Math.max(5,parseInt(el.kb.value,10)||100),
+    q:Math.min(1,Math.max(.2,(parseInt(el.q.value,10)||80)/100)),
+    resize:el.resizeSel.value,
+    longEdge:Math.max(50,parseInt(el.longEdge.value,10)||1920),
+    exW:Math.max(10,parseInt(el.exW.value,10)||413),
+    exH:Math.max(10,parseInt(el.exH.value,10)||531),
+    fmt:el.fmt.value
+  };
+}
+function outNameFor(orig,type,keep){
+  var ext = type==='image/png'?'png':(type==='image/webp'?'webp':'jpg');
+  var base = orig.replace(/\.[^.]+$/,'') || 'image';
+  return keep ? base+'.'+ext : base+'_compressed.'+ext;
+}
+function uniqueNames(){
+  var seen={};
+  items.forEach(function(it){
+    if(!it.outName) return;
+    var n=it.outName;
+    if(seen[n]){ var d=n.lastIndexOf('.'); n=n.slice(0,d)+'('+(++seen[n])+')'+n.slice(d); }
+    else seen[it.outName]=1;
+    it.outName=n;
+  });
+}
+
+function run(){
+  if(busy||!items.length) return;
+  var opt=readOpts();
+  busy=true; el.go.disabled=el.zip.disabled=el.clear.disabled=true;
+  el.prog.classList.add('show'); el.sum.classList.remove('show');
+  el.bar.style.width='0%'; el.ptxt.textContent='준비 중…';
+
+  var i=0, okCnt=0, totIn=0, totOut=0, missed=0;
+  function tick(){
+    if(i>=items.length) return finish();
+    var it=items[i];
+    el.ptxt.textContent='처리 중 '+(i+1)+' / '+items.length+' — '+it.name;
+    el.bar.style.width=Math.round(i/items.length*100)+'%';
+
+    if(it.url){ URL.revokeObjectURL(it.url); it.url=null; }
+    it.blob=null; it.err=null;
+
+    return compress(it,opt).then(function(r){
+      if(!r) throw new Error('압축 실패');
+      it.blob=r.blob; it.out=r.blob.size; it.w=r.w; it.h=r.h; it.hit=r.hit;
+      it.url=URL.createObjectURL(r.blob);
+      it.outName=outNameFor(it.name,r.type,el.keepName.checked);
+      okCnt++; totIn+=it.src; totOut+=it.out; if(!r.hit) missed++;
+    }).catch(function(e){
+      it.err=(e&&e.message)||'실패';
+    }).then(function(){
+      i++;
+      return new Promise(function(res){ setTimeout(res,0); }).then(tick);
+    });
+  }
+  Promise.resolve().then(tick);
+
+  function finish(){
+    uniqueNames();
+    busy=false; el.bar.style.width='100%';
+    el.ptxt.textContent='완료';
+    setTimeout(function(){ el.prog.classList.remove('show'); },700);
+    render();
+    if(okCnt){
+      var pct=totIn>0?Math.round((1-totOut/totIn)*100):0;
+      el.sum.innerHTML='<div class="n">용량 '+(pct>=0?pct:0)+'% 감소</div>'+
+        '<div class="s">'+okCnt+'장 · '+fmtSize(totIn)+' → <b>'+fmtSize(totOut)+'</b>'+
+        (missed?' · <span style="color:var(--warn)">'+missed+'장은 목표 용량에 도달하지 못했습니다</span>':'')+'</div>';
+      el.sum.classList.add('show');
+      if(missed) toast('목표가 너무 작습니다. 해상도를 더 줄이거나 목표 KB를 높여보세요');
+    }else{
+      toast('처리된 사진이 없습니다');
+    }
+  }
+}
+
+/* ───────── ZIP (STORE 방식, 라이브러리 없음) ───────── */
+var CRCT=null;
+function crc32(u8){
+  if(!CRCT){ CRCT=new Uint32Array(256);
+    for(var n=0;n<256;n++){ var c=n; for(var k=0;k<8;k++) c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1); CRCT[n]=c>>>0; } }
+  var crc=0xFFFFFFFF;
+  for(var i=0;i<u8.length;i++) crc=(crc>>>8)^CRCT[(crc^u8[i])&0xFF];
+  return (crc^0xFFFFFFFF)>>>0;
+}
+function buildZip(entries){
+  var enc=new TextEncoder(), parts=[], central=[], offset=0;
+  var d=new Date();
+  var dt=((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1))&0xFFFF;
+  var dd=(((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xFFFF;
+  var idx=0;
+  function next(){
+    if(idx>=entries.length){
+      var cdSize=0; central.forEach(function(c){cdSize+=c.length;});
+      var end=new Uint8Array(22), ev=new DataView(end.buffer);
+      ev.setUint32(0,0x06054b50,true);
+      ev.setUint16(8,entries.length,true); ev.setUint16(10,entries.length,true);
+      ev.setUint32(12,cdSize,true); ev.setUint32(16,offset,true);
+      return Promise.resolve(new Blob(parts.concat(central,[end]),{type:'application/zip'}));
+    }
+    var e=entries[idx++];
+    return e.blob.arrayBuffer().then(function(ab){
+      var data=new Uint8Array(ab), name=enc.encode(e.name), crc=crc32(data);
+      var lh=new Uint8Array(30+name.length), v=new DataView(lh.buffer);
+      v.setUint32(0,0x04034b50,true); v.setUint16(4,20,true); v.setUint16(6,0x0800,true); v.setUint16(8,0,true);
+      v.setUint16(10,dt,true); v.setUint16(12,dd,true);
+      v.setUint32(14,crc,true); v.setUint32(18,data.length,true); v.setUint32(22,data.length,true);
+      v.setUint16(26,name.length,true); v.setUint16(28,0,true);
+      lh.set(name,30);
+      parts.push(lh,data);
+
+      var ch=new Uint8Array(46+name.length), cv=new DataView(ch.buffer);
+      cv.setUint32(0,0x02014b50,true); cv.setUint16(4,20,true); cv.setUint16(6,20,true);
+      cv.setUint16(8,0x0800,true); cv.setUint16(10,0,true);
+      cv.setUint16(12,dt,true); cv.setUint16(14,dd,true);
+      cv.setUint32(16,crc,true); cv.setUint32(20,data.length,true); cv.setUint32(24,data.length,true);
+      cv.setUint16(28,name.length,true); cv.setUint32(42,offset,true);
+      ch.set(name,46);
+      central.push(ch);
+      offset+=lh.length+data.length;
+      return next();
+    });
+  }
+  return Promise.resolve().then(next);
+}
+function saveZip(){
+  var entries=items.filter(function(it){return it.blob;})
+                   .map(function(it){return {name:it.outName,blob:it.blob};});
+  if(!entries.length) return;
+  if(entries.length===1){
+    var a=document.createElement('a'); a.href=entries[0].blob?URL.createObjectURL(entries[0].blob):'#';
+    a.download=entries[0].name; a.click(); return;
+  }
+  el.zip.disabled=true; var old=el.zip.textContent; el.zip.textContent='압축 중…';
+  buildZip(entries).then(function(zb){
+    var url=URL.createObjectURL(zb), a=document.createElement('a');
+    a.href=url; a.download='compressed_'+entries.length+'files.zip'; a.click();
+    setTimeout(function(){URL.revokeObjectURL(url);},4000);
+    el.zip.textContent=old; el.zip.disabled=false;
+    toast('ZIP '+entries.length+'장 저장 완료');
+  }).catch(function(){
+    el.zip.textContent=old; el.zip.disabled=false; toast('ZIP 생성에 실패했습니다');
+  });
+}
+
+/* ───────── 이벤트 ───────── */
+el.drop.addEventListener('click',function(){ el.file.click(); });
+el.drop.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){e.preventDefault();el.file.click();} });
+el.file.addEventListener('change',function(){ addFiles(el.file.files); el.file.value=''; });
+['dragenter','dragover'].forEach(function(t){
+  el.drop.addEventListener(t,function(e){ e.preventDefault(); el.drop.classList.add('over'); });
+});
+['dragleave','drop'].forEach(function(t){
+  el.drop.addEventListener(t,function(e){ e.preventDefault(); el.drop.classList.remove('over'); });
+});
+el.drop.addEventListener('drop',function(e){ if(e.dataTransfer&&e.dataTransfer.files) addFiles(e.dataTransfer.files); });
+window.addEventListener('dragover',function(e){e.preventDefault();});
+window.addEventListener('drop',function(e){e.preventDefault();});
+document.addEventListener('paste',function(e){
+  if(!e.clipboardData) return;
+  var f=e.clipboardData.files;
+  if(f&&f.length){ addFiles(f); toast('붙여넣기로 '+f.length+'장 추가'); }
+});
+
+function setMode(m){
+  mode=m;
+  var t=(m==='target');
+  el.tabTarget.setAttribute('aria-selected',t?'true':'false');
+  el.tabQual.setAttribute('aria-selected',t?'false':'true');
+  el.targetBox.hidden=!t; el.qualBox.hidden=t;
+}
+el.tabTarget.onclick=function(){setMode('target');};
+el.tabQual.onclick=function(){setMode('quality');};
+
+el.kbChips.addEventListener('click',function(e){
+  var b=e.target.closest('.chip'); if(!b) return;
+  setChip(el.kbChips,b); el.kb.value=b.getAttribute('data-kb');
+});
+el.kb.addEventListener('input',function(){ setChip(el.kbChips,null);
+  var v=el.kb.value; var m=el.kbChips.querySelector('.chip[data-kb="'+v+'"]'); if(m) m.classList.add('on'); });
+
+el.longChips.addEventListener('click',function(e){
+  var b=e.target.closest('.chip'); if(!b) return;
+  setChip(el.longChips,b); el.longEdge.value=b.getAttribute('data-le');
+});
+el.longEdge.addEventListener('input',function(){ setChip(el.longChips,null);
+  var m=el.longChips.querySelector('.chip[data-le="'+el.longEdge.value+'"]'); if(m) m.classList.add('on'); });
+
+el.exChips.addEventListener('click',function(e){
+  var b=e.target.closest('.chip'); if(!b) return;
+  setChip(el.exChips,b);
+  el.exW.value=b.getAttribute('data-w'); el.exH.value=b.getAttribute('data-h');
+});
+function syncEx(){ setChip(el.exChips,null);
+  var m=el.exChips.querySelector('.chip[data-w="'+el.exW.value+'"][data-h="'+el.exH.value+'"]'); if(m) m.classList.add('on'); }
+el.exW.addEventListener('input',syncEx); el.exH.addEventListener('input',syncEx);
+
+el.q.addEventListener('input',function(){ el.qv.textContent=el.q.value+'%'; });
+el.resizeSel.addEventListener('change',function(){
+  var v=el.resizeSel.value;
+  el.longBox.hidden=(v!=='long');
+  el.exactBox.hidden=(v!=='exact');
+});
+el.go.onclick=run;
+el.zip.onclick=saveZip;
+el.clear.onclick=function(){
+  if(busy) return;
+  items.forEach(function(it){
+    if(it.url) URL.revokeObjectURL(it.url);
+    if(it.srcUrl) URL.revokeObjectURL(it.srcUrl);
+  });
+  items=[]; el.sum.classList.remove('show'); render();
+};
+
+render();
+})();
+</script>
+</body>
+</html>
