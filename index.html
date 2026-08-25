@@ -136,16 +136,19 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-
 <body>
 <div class="wrap">
 
-<!-- ╔══════════════════════════════════════════════════════════════╗
-     ║  광고 슬롯 · 상단 320 × 50 (모바일 배너)                      ║
-     ║  실제 게재 시 아래 <div class="ad-ph"> 를 광고 코드로 교체     ║
-     ║  · 애드센스: <ins class="adsbygoogle"                         ║
-     ║      style="display:inline-block;width:320px;height:50px"     ║
-     ║      data-ad-client="ca-pub-XXXX" data-ad-slot="XXXX"></ins>  ║
-     ║  · 카카오 애드핏: <ins class="kakao_ad_area" ...></ins>        ║
-     ╚══════════════════════════════════════════════════════════════╝ -->
+<!-- ╔═════════════════════════════════════════════════════════╗
+     ║  광고 슬롯 · 상단 320 × 50 · 카카오 애드핏 게재 중         ║
+     ║  광고단위 DAN-IpdRD8YUlC6OuZ9i (320×50)                    ║
+     ║  ※ 같은 광고단위 ID를 한 페이지에 두 번 넣지 마세요.      ║
+     ║  ※ ins가 display:none 으로 시작해도 .ad-top이 50px를        ║
+     ║    미리 잡고 있어 로드 직후 레이아웃이 밀리지 않습니다.   ║
+     ╚══════════════════════════════════════════════════════════╝ -->
 <div class="ad-slot ad-top" id="ad-top">
-  <div class="ad-ph">AD 320 &times; 50</div>
+  <ins class="kakao_ad_area" style="display:none;"
+    data-ad-unit = "DAN-IpdRD8YUlC6OuZ9i"
+    data-ad-width = "320"
+    data-ad-height = "50"></ins>
+  <script type="text/javascript" src="//t1.kakaocdn.net/kas/static/ba.min.js" async></script>
 </div>
 <!-- ══ 광고 슬롯 끝 ══ -->
 
