@@ -8,6 +8,13 @@
 <meta name="description" content="원서접수·증명사진·서류제출용 사진 용량을 100KB, 200KB 등 원하는 KB로 정확히 맞춰 줄입니다. 설치 없이 브라우저에서 바로, 사진은 서버로 전송되지 않습니다.">
 <meta property="og:title" content="사진 용량 줄이기 · 100KB 맞춤 이미지 압축기">
 <meta property="og:description" content="원하는 KB에 정확히 맞춰 압축. 설치 없이 브라우저에서 바로, 100% 내 기기에서 처리.">
+<meta property="og:type" content="website">
+<!-- 링크 미리보기 그림: 스크래퍼는 절대 주소만 읽으므로 배포 주소로 적는다. 그림은 make_thumbnail.py (또는 make_thumbnail.py og) 가 만든 og-image.png(1200×630) -->
+<meta property="og:image" content="https://hwj-hub.github.io/image_compressor/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="사진 용량 줄이기 — 4.20MB 사진을 화질 그대로 98KB로, 원하는 KB에 맞춰 서버 업로드 없이 압축">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%F0%9F%97%9C%3C/text%3E%3C/svg%3E">
 <style>
 *,*::before,*::after{box-sizing:border-box}
@@ -29,7 +36,8 @@
 html,body{margin:0;padding:0}
 body{background:var(--bg);color:var(--fg);line-height:1.55;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,sans-serif;
-  -webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+  -webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;
+  word-break:keep-all;overflow-wrap:break-word}
 .wrap{max-width:940px;margin:0 auto;padding:0 14px calc(56px + env(safe-area-inset-bottom))}
 
 /* ══ 광고 슬롯 ══ */
@@ -42,7 +50,7 @@ header{text-align:center;padding:16px 0 4px}
 .logo{display:inline-flex;align-items:center;gap:9px;font-size:22px;font-weight:800;letter-spacing:-.02em}
 .logo .ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;
   background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:var(--shadow)}
-.tag{font-size:14.5px;font-weight:600;color:var(--muted);margin:8px 0 0}
+.tag{font-size:14.5px;font-weight:600;color:var(--muted);margin:8px 0 0;text-wrap:balance}
 .tag b{color:var(--fg)}
 .badges{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
 .badge{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--okbg);color:var(--ok);border:1px solid transparent}
@@ -131,6 +139,23 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-
   padding:11px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:92vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 @media (prefers-color-scheme:dark){#toast{background:#e8ecf6;color:#0b1020}}
+
+/* ══ 주의 문구 ══════════════════════════════════════════
+   개인 상황에 따라 결과가 달라질 수 있다는 점과
+   법적 책임을 지지 않는다는 점을 페이지마다 고지한다.
+   ══════════════════════════════════════════════════════ */
+.nbx{border:1px solid var(--warn);border-radius:14px;background:var(--warnbg);padding:14px 15px;margin-top:14px}
+.nbx-h{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:800;color:var(--warn);margin:0 0 10px}
+.nbx-h .ic{flex:0 0 auto;width:19px;height:19px;border-radius:6px;background:var(--warn);color:var(--warnbg);
+  font-size:12px;font-weight:800;display:grid;place-items:center;line-height:1}
+.nbx ul{list-style:none;margin:0;padding:0}
+.nbx li{position:relative;padding-left:12px;margin-bottom:7px;font-size:12px;font-weight:600;line-height:1.68;color:var(--warn)}
+.nbx li:last-child{margin-bottom:0}
+.nbx li::before{content:"·";position:absolute;left:1px;top:-1px;font-weight:800}
+.nbx li b{font-weight:800}
+.nbx .nbx-f{margin:11px 0 0;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--warn) 32%,transparent);
+  font-size:12px;font-weight:700;line-height:1.72;color:var(--warn)}
+.nbx .nbx-f b{font-weight:800}
 </style>
 </head>
 <body>
@@ -154,7 +179,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-
 
 <header>
   <div class="logo"><span class="ico">🗜️</span><span>사진 용량 줄이기</span></div>
-  <p class="tag">원하는 <b>KB에 정확히 맞춰</b> 압축 · 설치 없이 브라우저에서 바로</p>
+  <p class="tag">원하는 <b>KB에 정확히 맞춰</b> 압축&nbsp;· 설치 없이 브라우저에서 바로</p>
   <div class="badges">
     <span class="badge">🔒 사진이 서버로 전송되지 않음</span>
     <span class="badge gray">무료 · 무제한</span>
@@ -279,10 +304,23 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-
   <details><summary>원서접수·증명사진 규격은 어떻게 맞추나요?</summary>
     <p>크기를 <b>정확한 픽셀(가운데 잘라내기)</b>로 바꾸고 증명 3×4cm(354×472) 또는 여권 3.5×4.5cm(413×531)를 고르세요. 형식은 JPG, 목표 용량은 기관 요구값(보통 100~300KB)으로 두면 됩니다.</p></details>
   <details><summary>아이폰 HEIC 파일이 안 열려요</summary>
-    <p>HEIC는 사파리 외 브라우저가 열지 못합니다. 아이폰 <b>설정 › 카메라 › 포맷 › 높은 호환성</b>으로 바꿔 촬영하거나, 사진을 카카오톡·메일로 한 번 보내 JPG로 변환한 뒤 사용하세요.</p></details>
+    <p>휴대폰에서 바로 고르면 대개 잘 열립니다. 아이폰은 사진 보관함의 사진을 넘겨줄 때 JPG로 바꿔 주기 때문입니다. 막히는 쪽은 <b>HEIC 파일을 PC로 옮긴 다음</b>입니다 — 윈도우의 크롬·엣지는 이 형식을 열지 못합니다(맥 사파리는 열립니다). 휴대폰에서 줄여서 옮기거나, 아이폰 <b>설정 › 카메라 › 포맷 › 높은 호환성</b>으로 바꿔 앞으로 찍는 사진을 JPG로 남기세요. 갤럭시도 카메라의 <b>고효율 사진</b>을 켜 두면 같은 일이 생깁니다.</p></details>
   <details><summary>위치정보(EXIF)는 남나요?</summary>
     <p>남지 않습니다. 다시 그려서 저장하는 방식이라 촬영 위치·기기 정보 같은 메타데이터가 모두 제거됩니다. 회전 방향만 올바르게 반영됩니다.</p></details>
 </div>
+
+  <!-- ══ 주의 문구 ══ -->
+  <div class="nbx">
+    <div class="nbx-h"><span class="ic">!</span><span>사용 전에 확인해 주세요</span></div>
+    <ul>
+      <li>모든 처리는 <b>브라우저 안에서만</b> 이루어지며 파일이 서버로 전송되지 않습니다.</li>
+      <li>변환 · 압축 과정에서 <b>화질이나 원본 정보(EXIF 등)가 손실될 수 있고</b>,
+        브라우저 · 기기 · 파일 형식에 따라 <b>결과물이 달라질 수 있습니다.</b></li>
+      <li>중요한 파일은 <b>반드시 원본을 따로 보관한 뒤</b> 사용하세요.</li>
+    </ul>
+    <p class="nbx-f">이 도구의 사용으로 발생한 <b>파일 손상 · 손실 등 어떠한 손해에 대해서도
+      제작자와 운영자는 법적 책임을 지지 않습니다.</b></p>
+  </div>
 
 <footer>
   100% 브라우저 내 처리 · 업로드 없음 · 파일 개수 제한 없음<br>
@@ -371,6 +409,7 @@ function render(){
       s.innerHTML='<span class="err">⚠ '+it.err+'</span>';
     }else if(it.blob){
       var pct=Math.round((1-it.out/it.src)*100);
+      if(pct>99&&it.out>0) pct=99;   // 99.5% 이상 줄어도 -100%로 보이면 파일이 0바이트가 된 것처럼 읽힌다
       s.innerHTML='<span class="dim">'+fmtSize(it.src)+'</span>'+
         '<span>→</span><span class="dim"><b>'+fmtSize(it.out)+'</b></span>'+
         '<span class="del'+(it.hit?'':' bad')+'">'+(pct>0?'-'+pct+'%':'+'+Math.abs(pct)+'%')+'</span>'+
@@ -627,6 +666,7 @@ function run(){
     render();
     if(okCnt){
       var pct=totIn>0?Math.round((1-totOut/totIn)*100):0;
+      if(pct>99&&totOut>0) pct=99;
       el.sum.innerHTML='<div class="n">용량 '+(pct>=0?pct:0)+'% 감소</div>'+
         '<div class="s">'+okCnt+'장 · '+fmtSize(totIn)+' → <b>'+fmtSize(totOut)+'</b>'+
         (missed?' · <span style="color:var(--warn)">'+missed+'장은 목표 용량에 도달하지 못했습니다</span>':'')+'</div>';
