@@ -41,10 +41,18 @@ body{background:var(--bg);color:var(--fg);line-height:1.55;
 .wrap{max-width:940px;margin:0 auto;padding:0 14px calc(56px + env(safe-area-inset-bottom))}
 
 /* ══ 광고 슬롯 ══ */
-.ad-slot{display:flex;align-items:center;justify-content:center;margin:10px auto;overflow:hidden}
-.ad-top{width:320px;height:50px;max-width:100%}
-.ad-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);
-  border-radius:8px;background:var(--card2);color:var(--muted);font-size:11px;letter-spacing:.08em;font-weight:600}
+/* 애드핏 정책: 한 페이지 4개 이하 · 콘텐츠를 덮지 않는 고정 자리 · 단추 근처 금지
+   자리 높이를 미리 잡아 광고가 뜰 때 레이아웃이 밀리지 않게 한다(오클릭 방지) */
+.ad-slot{margin:14px auto;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ad-slot::before{content:"광고";font-size:10px;letter-spacing:.14em;color:var(--muted);opacity:.6;margin-bottom:4px}
+.ad-slot>ins{display:none}
+#ad-a{min-height:68px}
+#ad-b{min-height:268px;margin-top:46px}      /* 결과가 아직 없을 때 '비우기' 단추와 붙지 않게 넉넉히 */
+#ad-c{min-height:118px}
+@media(min-width:768px){#ad-a{min-height:108px}}
+.ad-ph{display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);
+  border-radius:8px;background:var(--card2);color:var(--muted);font-size:11px;letter-spacing:.04em;font-weight:600;
+  width:100%;height:100%;min-height:inherit;padding:8px;text-align:center}
 
 header{text-align:center;padding:16px 0 4px}
 .logo{display:inline-flex;align-items:center;gap:9px;font-size:22px;font-weight:800;letter-spacing:-.02em}
@@ -161,21 +169,22 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-
 <body>
 <div class="wrap">
 
-<!-- ╔═════════════════════════════════════════════════════════╗
-     ║  광고 슬롯 · 상단 320 × 50 · 카카오 애드핏 게재 중         ║
-     ║  광고단위 DAN-IpdRD8YUlC6OuZ9i (320×50)                    ║
-     ║  ※ 같은 광고단위 ID를 한 페이지에 두 번 넣지 마세요.      ║
-     ║  ※ ins가 display:none 으로 시작해도 .ad-top이 50px를        ║
-     ║    미리 잡고 있어 로드 직후 레이아웃이 밀리지 않습니다.   ║
-     ╚══════════════════════════════════════════════════════════╝ -->
-<div class="ad-slot ad-top" id="ad-top">
-  <ins class="kakao_ad_area" style="display:none;"
-    data-ad-unit = "DAN-IpdRD8YUlC6OuZ9i"
-    data-ad-width = "320"
-    data-ad-height = "50"></ins>
-  <script type="text/javascript" src="//t1.kakaocdn.net/kas/static/ba.min.js" async></script>
-</div>
-<!-- ══ 광고 슬롯 끝 ══ -->
+<!-- ╔════════════════════════════════════════════════════════════════════╗
+     ║  카카오 애드핏 광고 자리 3개 — 게재 중 (운영정책: 한 페이지 4개 이하) ║
+     ║   A 최상단      모바일 320×50  DAN-IpdRD8YUlC6OuZ9i                 ║
+     ║                 PC     728×90  DAN-DSeAxnAMRBDKzHTF                 ║
+     ║   B 결과 요약 밑 300×250       DAN-mGAwpEoeFZxbbQdD  (모바일·PC 공통) ║
+     ║   C FAQ 아래     320×100       DAN-HLHdxA6k1OqkGRFW  (모바일·PC 공통) ║
+     ║                                                                      ║
+     ║  · data-p 가 없으면 PC 에서도 data-m 을 씁니다. 한 슬롯의 모바일·PC  ║
+     ║    는 동시에 뜨지 않아 같은 ID 를 나눠 써도 겹치지 않습니다.         ║
+     ║  · A 와 C 는 PC 에서 함께 보이므로 서로 다른 규격·ID 여야 합니다.    ║
+     ║  · ba.min.js 는 아래 로더가 한 번만 붙입니다(여러 번 넣지 말 것).    ║
+     ║  · 블로그에 iframe 으로 넣으면 광고를 아예 부르지 않습니다(정책).    ║
+     ╚════════════════════════════════════════════════════════════════════╝ -->
+<div class="ad-slot" id="ad-a"
+     data-m="320x50:DAN-IpdRD8YUlC6OuZ9i"
+     data-p="728x90:DAN-DSeAxnAMRBDKzHTF"></div>
 
 <header>
   <div class="logo"><span class="ico">🗜️</span><span>사진 용량 줄이기</span></div>
@@ -295,6 +304,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-
 
 <div id="sum"></div>
 
+<!-- 결과를 확인한 직후 자리 — 콘텐츠를 덮지 않는 본문 흐름 안, 실행 단추와 30px 이상 띄움 -->
+<div class="ad-slot" id="ad-b" data-m="300x250:DAN-mGAwpEoeFZxbbQdD"></div>
+
 <div class="card">
   <h2>자주 묻는 질문</h2>
   <details open><summary>제 사진이 어딘가로 업로드되나요?</summary>
@@ -308,6 +320,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-
   <details><summary>위치정보(EXIF)는 남나요?</summary>
     <p>남지 않습니다. 다시 그려서 저장하는 방식이라 촬영 위치·기기 정보 같은 메타데이터가 모두 제거됩니다. 회전 방향만 올바르게 반영됩니다.</p></details>
 </div>
+
+<div class="ad-slot" id="ad-c" data-m="320x100:DAN-HLHdxA6k1OqkGRFW"></div>
 
   <!-- ══ 주의 문구 ══ -->
   <div class="nbx">
@@ -671,6 +685,10 @@ function run(){
         '<div class="s">'+okCnt+'장 · '+fmtSize(totIn)+' → <b>'+fmtSize(totOut)+'</b>'+
         (missed?' · <span style="color:var(--warn)">'+missed+'장은 목표 용량에 도달하지 못했습니다</span>':'')+'</div>';
       el.sum.classList.add('show');
+      try{                                    // 사용자가 누른 동작의 결과로 결과 요약을 보여 준다
+        var _rm=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        el.sum.scrollIntoView({behavior:_rm?'auto':'smooth',block:'center'});
+      }catch(e){}
       if(missed) toast('목표가 너무 작습니다. 해상도를 더 줄이거나 목표 KB를 높여보세요');
     }else{
       toast('처리된 사진이 없습니다');
@@ -817,6 +835,42 @@ el.clear.onclick=function(){
 };
 
 render();
+})();
+</script>
+
+<script>
+/* 애드핏 로더
+   · 아이프레임(블로그 본문 임베드) 안에서는 호출하지 않는다 — 운영정책상 아이프레임 광고 호출 금지
+   · 공식 가이드에 반응형 방법이 없어, 스크립트를 붙이기 "전에" 화면 크기에 맞는 ins 만 만들어 둔다
+   · ba.min.js 는 한 번만 (ins 는 여러 개 가능) */
+(function(){
+  var embedded = false;
+  try { embedded = window.self !== window.top; } catch (e) { embedded = true; }
+  var pc = window.matchMedia('(min-width:768px)').matches, live = 0;
+  Array.prototype.forEach.call(document.querySelectorAll('.ad-slot'), function(slot){
+    var spec = (pc ? (slot.getAttribute('data-p') || slot.getAttribute('data-m'))
+                   : slot.getAttribute('data-m')) || '';
+    if (embedded || !spec) { slot.style.display = 'none'; return; }
+    var part = spec.split(':'), wh = part[0].split('x'), unit = part[1];
+    if (unit.indexOf('DAN-NEED') === 0) {           // 아직 발급 전 — 잘못된 광고 요청을 보내지 않는다
+      slot.innerHTML = '<span class="ad-ph">' + wh[0] + ' × ' + wh[1] + '<br>광고단위 발급 후 교체</span>';
+      return;
+    }
+    var ins = document.createElement('ins');
+    ins.className = 'kakao_ad_area';
+    ins.style.display = 'none';
+    ins.setAttribute('data-ad-unit', unit);
+    ins.setAttribute('data-ad-width', wh[0]);
+    ins.setAttribute('data-ad-height', wh[1]);
+    slot.appendChild(ins);
+    live++;
+  });
+  if (live) {
+    var sc = document.createElement('script');
+    sc.async = true;
+    sc.src = 'https://t1.kakaocdn.net/kas/static/ba.min.js';
+    document.body.appendChild(sc);
+  }
 })();
 </script>
 </body>
