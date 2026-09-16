@@ -47,7 +47,6 @@ body{background:var(--bg);color:var(--fg);line-height:1.55;
 .ad-slot::before{content:"";font-size:10px;letter-spacing:.14em;color:var(--muted);opacity:.6;margin-bottom:4px}
 .ad-slot>ins{display:none}
 #ad-a{min-height:68px}
-#ad-b{min-height:268px;margin-top:46px}      /* 결과가 아직 없을 때 '비우기' 단추와 붙지 않게 넉넉히 */
 #ad-c{min-height:118px}
 @media(min-width:768px){#ad-a{min-height:108px}}
 .ad-ph{display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);
@@ -143,6 +142,25 @@ summary::before{content:"＋ ";color:var(--accent);font-weight:800}
 details[open] summary::before{content:"－ "}
 details p{margin:8px 0 0;font-size:13.5px;color:var(--muted)}
 footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-height:1.8}
+/* 결과 안내 팝업 — 다운로드를 막지 않고, 닫기는 언제나 바로 눌립니다.
+   광고는 숨은 동안에도 자리(레이아웃)를 가지고 있어야 애드핏이 그려 넣습니다 → display:none 대신 visibility */
+#doneModal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:12px;
+  visibility:hidden;opacity:0;pointer-events:none;transition:opacity .18s}
+#doneModal.show{visibility:visible;opacity:1;pointer-events:auto}
+#doneModal .dm-back{position:absolute;inset:0;background:rgba(8,12,24,.55)}
+.dm-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 20px 60px -20px rgba(0,0,0,.6);padding:18px 12px 14px;width:min(344px,100vw - 16px);
+  max-height:calc(100vh - 24px);overflow:auto;text-align:center}
+.dm-x{position:absolute;right:6px;top:6px;width:42px;height:42px;border:0;background:transparent;
+  color:var(--muted);font-size:24px;line-height:1;cursor:pointer;border-radius:10px}
+.dm-x:hover{color:var(--fg);background:var(--card2)}
+.dm-h{display:flex;align-items:center;justify-content:center;gap:8px;font-size:17px;font-weight:800;padding:0 34px}
+.dm-ic{flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:var(--ok);color:var(--card);
+  display:grid;place-items:center;font-size:15px;font-weight:900}
+.dm-s{margin:7px 0 0;font-size:13px;color:var(--muted);line-height:1.6}
+.dm-ad{min-height:250px;margin:14px auto 12px}
+#dmClose{width:100%}
+@media(max-width:340px){.dm-card{padding:16px 6px 12px}}
 #toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:#111827;color:#fff;font-size:13.5px;font-weight:700;
   padding:11px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:92vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
@@ -304,9 +322,6 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-
 
 <div id="sum"></div>
 
-<!-- 결과를 확인한 직후 자리 — 콘텐츠를 덮지 않는 본문 흐름 안, 실행 단추와 30px 이상 띄움 -->
-<div class="ad-slot" id="ad-b" data-m="300x250:DAN-mGAwpEoeFZxbbQdD"></div>
-
 <div class="card">
   <h2>자주 묻는 질문</h2>
   <details open><summary>제 사진이 어딘가로 업로드되나요?</summary>
@@ -340,6 +355,20 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-
   100% 브라우저 내 처리 · 업로드 없음 · 파일 개수 제한 없음<br>
   © 사진 용량 줄이기 — 오프라인에서도 동작하는 단일 파일 유틸리티
 </footer>
+</div>
+
+<!-- 결과 안내 팝업 : 사용자가 [용량 줄이기] 또는 [ZIP으로 전체 저장]을 누른 뒤 한 번만 뜹니다.
+     · 저장·다운로드는 팝업과 무관하게 그대로 진행됩니다(광고를 눌러야 닫히는 구조 아님)
+     · 닫기(×, 닫기 단추, 바깥 누르기, ESC)는 처음부터 모두 활성 -->
+<div id="doneModal" aria-hidden="true">
+  <div class="dm-back" id="dmBack"></div>
+  <div class="dm-card" role="dialog" aria-modal="true" aria-labelledby="dmTitle">
+    <button class="dm-x" id="dmX" type="button" aria-label="닫기">&times;</button>
+    <div class="dm-h"><span class="dm-ic">✓</span><span id="dmTitle">저장했어요</span></div>
+    <p class="dm-s" id="dmSub"></p>
+    <div class="ad-slot dm-ad" id="ad-p" data-m="300x250:DAN-mGAwpEoeFZxbbQdD"></div>
+    <button class="btn" id="dmClose" type="button">닫기</button>
+  </div>
 </div>
 
 <div id="toast" role="status" aria-live="polite"></div>
@@ -437,7 +466,11 @@ function render(){
 
     if(it.blob){
       var a=document.createElement('a'); a.className='dl'; a.textContent='저장';
-      a.href=it.url; a.download=it.outName; row.appendChild(a);
+      a.href=it.url; a.download=it.outName;
+      a.addEventListener('click',function(){          // 다운로드는 그대로 진행되고, 안내 팝업만 한 번 뜬다
+        openDone('저장했어요', it.outName+' · '+fmtSize(it.out)+' — 다운로드 폴더를 확인해 주세요.');
+      });
+      row.appendChild(a);
     }
     var x=document.createElement('button'); x.className='x'; x.type='button';
     x.setAttribute('aria-label','제거'); x.innerHTML='&times;';
@@ -685,6 +718,8 @@ function run(){
         '<div class="s">'+okCnt+'장 · '+fmtSize(totIn)+' → <b>'+fmtSize(totOut)+'</b>'+
         (missed?' · <span style="color:var(--warn)">'+missed+'장은 목표 용량에 도달하지 못했습니다</span>':'')+'</div>';
       el.sum.classList.add('show');
+      openDone(okCnt+'장을 줄였어요',
+               fmtSize(totIn)+' → '+fmtSize(totOut)+' · 사진마다 [저장]을 누르거나 [ZIP으로 전체 저장]으로 한 번에 받으세요.');
       try{                                    // 사용자가 누른 동작의 결과로 결과 요약을 보여 준다
         var _rm=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         el.sum.scrollIntoView({behavior:_rm?'auto':'smooth',block:'center'});
@@ -760,9 +795,32 @@ function saveZip(){
     setTimeout(function(){URL.revokeObjectURL(url);},4000);
     el.zip.textContent=old; el.zip.disabled=false;
     toast('ZIP '+entries.length+'장 저장 완료');
+    openDone('ZIP으로 저장했어요', entries.length+'장이 압축 파일 하나로 받아졌어요. 다운로드 폴더를 확인해 주세요.');
   }).catch(function(){
     el.zip.textContent=old; el.zip.disabled=false; toast('ZIP 생성에 실패했습니다');
   });
+}
+
+/* ───────── 결과 안내 팝업 ───────── */
+var dm=$('#doneModal'), dmShown=false, dmPrev=null;
+function openDone(title,sub){
+  // [용량 줄이기] · [저장] · [ZIP으로 전체 저장] 중 먼저 누른 것에서 한 번만 뜬다.
+  // 애드핏 정책: 화면을 덮는 광고는 방문자가 의도한 동작에 '1회'만, 동일 동선 반복 노출 금지.
+  // 매번 띄우려면 아래 dmShown 조건을 빼면 되지만 정책 위반 소지가 커진다.
+  if(dmShown||!dm) return;
+  dmShown=true; dmPrev=document.activeElement;
+  $('#dmTitle').textContent=title; $('#dmSub').textContent=sub;
+  dm.classList.add('show'); dm.setAttribute('aria-hidden','false');
+  setTimeout(function(){ var b=$('#dmClose'); if(b) b.focus(); },30);
+}
+function closeDone(){
+  if(!dm) return;
+  dm.classList.remove('show'); dm.setAttribute('aria-hidden','true');
+  if(dmPrev&&dmPrev.focus) try{dmPrev.focus();}catch(e){}
+}
+if(dm){
+  $('#dmX').onclick=closeDone; $('#dmClose').onclick=closeDone; $('#dmBack').onclick=closeDone;
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&dm.classList.contains('show')) closeDone(); });
 }
 
 /* ───────── 이벤트 ───────── */
